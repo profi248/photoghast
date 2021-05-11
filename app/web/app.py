@@ -1,15 +1,23 @@
 import flask
 import flask_login
+import sqlalchemy as sql
+from sqlalchemy.orm import sessionmaker
 
 import utils
 import forms
 import user_manager
-import config
+import utils.config as config
+from utils.db_models import *
+
 
 app = flask.Flask(__name__)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = config.secret
+
+db_engine = sql.create_engine(config.db_uri, echo=False)
+Session = sessionmaker(bind=db_engine)
+db_session = Session()
 
 @app.route('/')
 def index():

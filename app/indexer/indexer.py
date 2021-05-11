@@ -1,58 +1,19 @@
 import sqlalchemy as sql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 import os
 import datetime
 import exiftool
 
+import utils.config as config
+from utils.db_models import *
 
-verbose = False
-path = "test-images"
+verbose = config.debug
+path = config.image_path
 
-engine = sql.create_engine('sqlite:///index3.db')  # , echo=True
-Base = declarative_base()
-
-class Album(Base):
-    __tablename__ = 'albums'
-
-    id = sql.Column(sql.Integer, primary_key=True, autoincrement=True)  # with_variant(sql.Integer, "sqlite")
-    name = sql.Column(sql.String(255), unique=True)
-    virtual = sql.Column(sql.Boolean)
-
-    def __repr__(self):
-        return "<Album(name='%s', virtual='%d')>" % (
-                                self.name, self.virtual)
-
-class Image(Base):
-    __tablename__ = 'images'
-
-    id = sql.Column(sql.Integer, primary_key=True, autoincrement=True)  # ().with_variant(sql.Integer, "sqlite")
-    path = sql.Column(sql.String(4096))  # unique=True
-    name = sql.Column(sql.String(255))
-    creation = sql.Column(sql.DateTime)
-    mtime = sql.Column(sql.DateTime)
-    width = sql.Column(sql.Integer)
-    height = sql.Column(sql.Integer)
-    size = sql.Column(sql.BigInteger)
-    geo_east = sql.Column(sql.Float(precision='15,10'), nullable=True)
-    geo_west = sql.Column(sql.Float(precision='15,10'), nullable=True)
-    format = sql.Column(sql.String(64))
-    album_id = sql.Column(sql.Integer, sql.ForeignKey("albums.id"), nullable=True, index=True)  # ().with_variant(sql.Integer, "sqlite")
-    album = relationship(Album, primaryjoin=album_id == Album.id)
-
-    def __repr__(self):
-        return "<Image(path='%s', format='%s', album=%s)>" % (
-                                self.path, self.format, self.album)
-class LastUpdated(Base):
-    __tablename__ = 'last_updated'
-    key = sql.Column(sql.String(32), primary_key=True)
-    date = sql.Column(sql.DateTime)
-
+engine = sql.create_engine(config.db_uri, echo=verbose)
 Base.metadata.create_all(engine)
-
 Session = sessionmaker(bind=engine)
 session = Session()
-# session.add(Image(path=))
 
 scan_started = datetime.datetime.now()
 epoch_zero = datetime.datetime.fromtimestamp(0)
