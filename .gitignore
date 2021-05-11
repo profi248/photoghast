@@ -1,0 +1,11 @@
+.idea
+*.py[cod]
+__pycache__/
+venv
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+index3.db
+test-images

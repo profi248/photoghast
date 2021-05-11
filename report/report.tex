@@ -1,0 +1,83 @@
+%% 
+%% Created in 2018 by Martin Slapak
+%% last update:		2020-02-09
+%%
+%% Based on file for NRP report LaTeX class by Vit Zyka (2008)
+%% enhanced for MI-MVI (2018) and tuned for BI-PYT (2020)
+%%
+%% Compilation:
+%% >pdflatex report
+%% >bibtex report
+%% >pdflatex report
+%% >pdflatex report
+
+% arara: xelatex
+% arara: bibtex
+% arara: xelatex
+% arara: xelatex
+
+
+\documentclass[czech]{template/pyt-report}
+
+\title{Výstižný název vaší semestrální práce}
+
+\author{David Košťál}
+\affiliation{FIT ČVUT}
+\email{kostada2@fit.cvut.cz}
+
+\def\file#1{{\tt#1}}
+
+\begin{document}
+
+\maketitle
+
+Strukturu sekcí reportu si pochopitelně můžete upravit, aby vám co nejlépe vyhovovala pro popis vaší práce.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Úvod}
+Definice problému/úkolu, který práce řeší\ldots
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Vstupní data}
+Původ, proces získání, předzpracování, jejich omezení\ldots
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Metody/postupy/algoritmy}
+Použité metody, jejich přizpůsobení, aplikace\ldots \\
+S jakými výzvami jste bojovali\ldots
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- VYSLEDKY
+\section{Výsledky}
+
+Jakých výsledků bylo dosaženo, co na ně melo vliv. Srovnání s očekáváním, \emph{diskuze nad výsledky} -- zvláště důležitá v případě, že něco vyšlo \emph{divně}.
+
+\begin{figure}[h]
+  \centering\leavevmode
+  \includegraphics[width=.45\linewidth]{template/img/fit-logo-cz.pdf}\vskip-0.5cm
+  \caption{Vliv parametru \emph{Y}}
+  \label{fig:par-y}
+\end{figure}
+\begin{figure}[h]
+  \centering\leavevmode
+  \includegraphics[width=.45\linewidth]{template/img/fit-logo-en.pdf}\vskip-0.5cm
+  \caption{Vliv parametru \emph{X}}
+  \label{fig:par-x}
+\end{figure}
+
+Jak je z ilustrací \ref{fig:par-y} a \ref{fig:par-x} patrné, není to totéž, protože\ldots
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- ZAVER
+\section{Závěr}
+K čemu to bylo/je dobré, jak to půjde využít dále, co by šlo ještě vylepšit\ldots 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- Bibliography
+\nocite{zizka}
+%\bibliographystyle{plain-cz-online}
+\bibliography{reference}
+
+\end{document}
