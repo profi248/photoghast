@@ -19,6 +19,7 @@ epoch_zero = datetime.datetime.fromtimestamp(0)
 last_update = session.query(LastUpdated.date).filter(LastUpdated.key == "fs_scan").one_or_none()
 if last_update:
     print("[indexer] last scan started:", last_update[0])
+    last_update = last_update[0]
 else:
     print("[indexer] first scan")
     session.add(LastUpdated(key="fs_scan", date=epoch_zero))
