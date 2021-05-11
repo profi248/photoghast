@@ -36,6 +36,7 @@ class Image(Base):
     geo_lat = sql.Column(sql.Float(precision='15,10'), nullable=True)
     geo_lon = sql.Column(sql.Float(precision='15,10'), nullable=True)
     format = sql.Column(sql.String(64))
+    thumbnail = sql.Column(sql.LargeBinary())
     album_id = sql.Column(sql.Integer, sql.ForeignKey("albums.id"), nullable=True, index=True)
     album = relationship(Album, primaryjoin=album_id == Album.id)
 

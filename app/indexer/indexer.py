@@ -1,3 +1,4 @@
+import PIL
 import sqlalchemy as sql
 import os
 import datetime
@@ -6,6 +7,7 @@ import exiftool
 import utils.config as config
 from utils.db_models import *
 from utils.common import get_db_session
+from thumbnail import generate_thumbnail
 
 
 verbose = config.debug
@@ -84,9 +86,15 @@ def browse_folder(path, album=None):
                     gps_lat = None
                     gps_lon = None
 
+                try:
+                    # todo fix thumbs (efficiency...)
+                    thumbnail = generate_thumbnail(entry.path)
+                except PIL.UnidentifiedImageError:
+                    thumbnail = None
+
                 image = Image(path=entry.path, name=entry.name, creation=dto, mtime=datetime.datetime.fromtimestamp(entry.stat().st_mtime),
                               geo_lat=gps_lat, geo_lon=gps_lon, width=img_size[0], height=img_size[1], size=entry.stat().st_size,
-                              format=file_mime, album_id=album)
+                              format=file_mime, album_id=album, thumbnail=thumbnail)
 
                 session.merge(image)
                 if verbose:
