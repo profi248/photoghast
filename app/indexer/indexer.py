@@ -34,6 +34,10 @@ new_cnt = 0
 # check if we can actually access the file
 # renamed folder breaks scanning
 def browse_folder(path, album=None):
+    if not os.path.exists(path):
+        print("[indexer] error: path '{}' does not exist".format(path))
+        exit(1)
+
     with os.scandir(path) as it:
         global nodes_cnt
         global new_cnt
@@ -111,7 +115,6 @@ def browse_folder(path, album=None):
                     print("[indexer] existing file:", entry.path, "(file ctime is older than start of last scan, ignoring)")
 
 print("[indexer] starting scan")
-nodes_cnt = 0
 exif = exiftool.ExifTool()
 exif.start()
 browse_folder(path)
