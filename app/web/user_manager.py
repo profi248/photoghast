@@ -2,7 +2,7 @@ import flask_login
 import bcrypt
 
 import utils.db_models as models
-from web_utils import get_db_session
+from utils.common import get_db_session
 
 
 def login(username: str, passwd: str):
