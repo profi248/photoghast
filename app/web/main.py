@@ -8,7 +8,8 @@ import forms
 import user_manager
 import utils.config as config
 import utils.db_models as models
-from utils.common import get_db_session
+import os
+from utils.common import *
 
 app = flask.Flask(__name__)
 login_manager = flask_login.LoginManager()
@@ -20,7 +21,8 @@ app.config['SECRET_KEY'] = config.secret
 def index():
     if flask_login.current_user.is_authenticated:
         db_session = get_db_session()
-        images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height) \
+        images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height,
+                                  models.Image.width, models.Image.height) \
             .order_by(models.Image.creation.desc()).all()
         return flask.render_template('library.html', current_user=flask_login.current_user, images=images)
     else:
@@ -37,6 +39,20 @@ def thumb(img_id):
 
     bytestream = io.BytesIO(img_db.thumbnail)
     return flask.send_file(bytestream, mimetype="image/jpeg",
+                           last_modified=img_db.mtime, cache_timeout=config.cache_max_sec)
+
+
+@app.route('/image/<int:img_id>', methods=['GET'])
+@flask_login.login_required
+def image(img_id):
+    db_session = get_db_session()
+    img_db = db_session.query(models.Image).filter(models.Image.id == img_id).one_or_none()
+    if not img_db:
+        return flask.abort(404)
+
+    file = os.path.join(get_project_root(), img_db.path)
+
+    return flask.send_file(file, mimetype="image/jpeg",
                            last_modified=img_db.mtime, cache_timeout=config.cache_max_sec)
 
 

@@ -5,9 +5,9 @@
         {% for img in images %}
             <div class="col-sm-6 col-lg-4 col-xl-3 my-2" style="height: auto">
                 <div class="card">
-                    <a href="{{ url_for("thumb", img_id=img.id) }}"
-                       data-pswp-width="1669"
-                       data-pswp-height="2500"
+                    <a href="{{ url_for("image", img_id=img.id) }}"
+                       data-pswp-width="{{ img.width }}"
+                       data-pswp-height="{{ img.height }}"
                        target="_blank">
                         <img class="img-fluid" style="width: 100%; object-fit: cover;"
                              src="{{ url_for("thumb", img_id=img.id) }}"
@@ -22,7 +22,6 @@
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
     <script>
         var mason = new Masonry(document.querySelector("#g2"), {
-               // "fitWidth": true, "percentPosition": true, "columnWidth": 100, "gutter": 5
             "percentPosition": true
         });
 
