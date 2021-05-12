@@ -48,7 +48,13 @@ def browse_folder(path, album=None):
             # check if file is not hidden and if it was modified after last scan
             if not entry.name.startswith('.') and entry.is_file() \
                     and entry.stat().st_ctime > datetime.datetime.timestamp(last_update):
-                new_cnt += 1            
+
+                if len(entry.name.split(".")) >= 1 and entry.name.split(".")[-1].lower() not in config.file_extensions_whitelist:
+                    print("[indexer] info: format of file '{}' is not currently supported".format(entry.path))
+                    continue
+
+                new_cnt += 1
+
                 try:
                     exifdata = exif.get_metadata(entry.path)
                 except:
@@ -87,11 +93,13 @@ def browse_folder(path, album=None):
                     gps_lon = None
 
                 try:
+                    if img_size == (0, 0):
+                        raise ValueError
                     thumbnail = generate_thumbnail(entry.path)
                     thumb_x = thumbnail[0]
                     thumb_y = thumbnail[1]
                     thumb_img = thumbnail[2]
-                except PIL.UnidentifiedImageError:
+                except (ValueError, PIL.UnidentifiedImageError):
                     thumb_x = None
                     thumb_y = None
                     thumb_img = None

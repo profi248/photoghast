@@ -5,6 +5,8 @@ image_path = "test-images"
 debug = True
 db_debug = False
 
+file_extensions_whitelist = ["jpg", "jpeg", "png"]
+
 default_username = "admin"
 default_pass = "pythonrocks"
 
