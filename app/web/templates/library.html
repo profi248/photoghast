@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>This is the photo library</h1>
+    {% for i in range(0, 100) %}
+        <img src="https://picsum.photos/300/200" alt="alt" class="img-thumbnail mb-1">
+    {% endfor %}
 {% endblock %}
