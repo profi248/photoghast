@@ -47,7 +47,7 @@ def browse_folder(path, album=None):
             nodes_cnt += 1
             # check if file is not hidden and if it was modified after last scan
             if not entry.name.startswith('.') and entry.is_file() \
-                    and entry.stat().st_mtime > datetime.datetime.timestamp(last_update):
+                    and entry.stat().st_ctime > datetime.datetime.timestamp(last_update):
                 new_cnt += 1            
                 try:
                     exifdata = exif.get_metadata(entry.path)
@@ -76,8 +76,8 @@ def browse_folder(path, album=None):
                     dto = datetime.datetime.strptime(exifdata['EXIF:CreateDate'], '%Y:%m:%d %H:%M:%S')
                 except KeyError:
                     if verbose:
-                        print("[indexer] info: image creation time from fs ctime")
-                    dto = datetime.datetime.fromtimestamp(entry.stat().st_ctime)
+                        print("[indexer] info: image creation time from fs mtime")
+                    dto = datetime.datetime.fromtimestamp(entry.stat().st_mtime)
 
                 try:
                     gps_lat = exifdata["EXIF:GPSLatitude"]
@@ -87,7 +87,6 @@ def browse_folder(path, album=None):
                     gps_lon = None
 
                 try:
-                    # todo fix thumbs (efficiency...)
                     thumbnail = generate_thumbnail(entry.path)
                 except PIL.UnidentifiedImageError:
                     thumbnail = None
@@ -125,7 +124,7 @@ def browse_folder(path, album=None):
                 browse_folder(entry.path, new_album_id)
             elif not entry.name.startswith('.') and entry.is_file():
                 if verbose:
-                    print("[indexer] existing file:", entry.path, "(file mtime is older than start of last scan, ignoring)")
+                    print("[indexer] existing file:", entry.path, "(file ctime is older than start of last scan, ignoring)")
 
 print("[indexer] starting scan")
 exif = exiftool.ExifTool()

@@ -4,14 +4,18 @@ from PIL import Image
 
 import utils.config as config
 
-def generate_thumbnail(path):
+def generate_thumbnail(path: str):
+    desired_x = config.thumb_target_size_x
+    desired_y = config.thumb_target_size_y
+
     img = Image.open(path)
     array = np.asarray(img)
-    x, y, _ = array.shape
+    y, x, _ = array.shape
+    coefficient_x = round(x / desired_x)
+    coefficient_y = round(y / desired_y)
+    coefficient = max(coefficient_x, coefficient_y)
 
-    # todo
-    # config.thumb_target_size
-    thumb_array = array[::4, ::4, :]
+    thumb_array = array[::coefficient, ::coefficient, :3]  # discard transparency value
 
     thumb = Image.fromarray(thumb_array.astype(np.int8), 'RGB')
     thumb_bytes = io.BytesIO()

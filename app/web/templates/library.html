@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% for i in range(0, 100) %}
-        <img src="https://picsum.photos/300/200" alt="alt" class="img-thumbnail mb-1">
+    {% for img in images %}
+        <img src="{{ url_for("thumb", img_id=img.id) }}" alt="{{ img.name }}" class="img-thumbnail mb-1">
     {% endfor %}
 {% endblock %}
