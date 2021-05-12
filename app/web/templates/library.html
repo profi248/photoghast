@@ -9,26 +9,22 @@
                        data-pswp-width="{{ img.width }}"
                        data-pswp-height="{{ img.height }}"
                        target="_blank">
-                        <img class="img-fluid" style="width: 100%; object-fit: cover;"
-                             src="{{ url_for("thumb", img_id=img.id) }}"
+                        <img class="img-fluid lazyload" style="width: 100%; object-fit: cover;"
+                             data-src="{{ url_for("thumb", img_id=img.id) }}"
                              alt="{{ img.name }}">
                     </a>
                 </div>
             </div>
         {% endfor %}
     </div>
-
-    <script src="/static/js/imagesloaded.pkgd.min.js"></script>
+    <script src="/static/js/lazysizes.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
     <script>
         var mason = new Masonry(document.querySelector("#g2"), {
-            "percentPosition": true
+            "percentPosition": true, transitionDuration: '0', stagger: 10
         });
 
-        imgLoad = imagesLoaded(document.querySelector("#g2"));
-        imgLoad.on( 'progress', function( instance, image ) {
-            var result = image.isLoaded ? 'loaded' : 'broken';
-            console.log( 'image is ' + result + ' for ' + image.img.src );
+        document.addEventListener('lazyloaded', function(e) {
             mason.layout();
         });
     </script>
