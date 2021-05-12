@@ -12,12 +12,14 @@ def login(username: str, passwd: str):
     passwd_user = passwd.encode(encoding="utf-8")
 
     if user_db:
+        invalid = False
         passwd_db = user_db.password
     else:
-        # protect against timing attacks
-        passwd_db = b""
+        # compare with dummy password to prevent timing attacks
+        invalid = True
+        passwd_db = b'$2b$12$0KnC/RBTaGH0E9UXMl.Fnebyrf.lPw3dqGRjXv7P.ofiEAGbeWRDi'
 
-    if bcrypt.checkpw(passwd_user, passwd_db):
+    if bcrypt.checkpw(passwd_user, passwd_db) and not invalid:
         return user_db
     else:
         return None
