@@ -1,7 +1,58 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% for img in images %}
-        <img src="{{ url_for("thumb", img_id=img.id) }}" alt="{{ img.name }}" class="img-thumbnail mb-1">
-    {% endfor %}
+    <div class="row pswp-gallery pswp-gallery--single-column" id="g2">
+        {% for img in images %}
+            <div class="col-sm-6 col-lg-4 col-xl-3 my-2" style="height: auto">
+                <div class="card">
+                    <a href="{{ url_for("thumb", img_id=img.id) }}"
+                       data-pswp-width="1669"
+                       data-pswp-height="2500"
+                       target="_blank">
+                        <img class="img-fluid" style="width: 100%; object-fit: cover;"
+                             src="{{ url_for("thumb", img_id=img.id) }}"
+                             alt="{{ img.name }}">
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script src="/static/js/imagesloaded.pkgd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
+    <script>
+        var mason = new Masonry(document.querySelector("#g2"), {
+               // "fitWidth": true, "percentPosition": true, "columnWidth": 100, "gutter": 5
+            "percentPosition": true
+        });
+
+        imgLoad = imagesLoaded(document.querySelector("#g2"));
+        imgLoad.on( 'progress', function( instance, image ) {
+            var result = image.isLoaded ? 'loaded' : 'broken';
+            console.log( 'image is ' + result + ' for ' + image.img.src );
+            mason.layout();
+        });
+    </script>
+
+    <script type="module">
+        // Include Lightbox
+        import PhotoSwipeLightbox from '/static/js/photoswipe/photoswipe-lightbox.esm.min.js';
+
+        const lightbox = new PhotoSwipeLightbox({
+            // may select multiple "galleries"
+            gallerySelector: '#g2',
+
+            // Elements within gallerySelector (slides)
+            childSelector: 'a',
+
+            // Include PhotoSwipe Core
+            // and use absolute path (that starts with http(s)://)
+            pswpModule: '/static/js/photoswipe/photoswipe.esm.min.js',
+
+            // Include CSS file,
+            // (if you haven't included in via <link>)
+            pswpCSS: '/static/js/photoswipe/photoswipe.css'
+        });
+        lightbox.init();
+    </script>
 {% endblock %}

@@ -9,7 +9,8 @@ default_username = "admin"
 default_pass = "pythonrocks"
 
 thumb_jpeg_quality = 75
-thumb_target_size_x = 250
-thumb_target_size_y = 300
+thumb_target_size_x = 350
+thumb_target_size_y = 400
+# thumb_scaling = 2
 
 cache_max_sec = 3600 * 24 * 7

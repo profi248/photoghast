@@ -16,10 +16,13 @@ def generate_thumbnail(path: str):
     coefficient = max(coefficient_x, coefficient_y)
 
     thumb_array = array[::coefficient, ::coefficient, :3]  # discard transparency value
+    thumb_y, thumb_x, _ = thumb_array.shape
 
     thumb = Image.fromarray(thumb_array.astype(np.int8), 'RGB')
     thumb_bytes = io.BytesIO()
     thumb.save(thumb_bytes, format="JPEG", quality=config.thumb_jpeg_quality)
     thumbnail = thumb_bytes.getvalue()
     img.close()
-    return thumbnail
+
+
+    return (thumb_x, thumb_y, thumbnail)

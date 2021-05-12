@@ -20,10 +20,12 @@ app.config['SECRET_KEY'] = config.secret
 def index():
     if flask_login.current_user.is_authenticated:
         db_session = get_db_session()
-        images = db_session.query(models.Image.id, models.Image.name).all()
+        images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height) \
+            .order_by(models.Image.creation.desc()).all()
         return flask.render_template('library.html', current_user=flask_login.current_user, images=images)
     else:
         return flask.render_template('index.html', current_user=flask_login.current_user)
+
 
 @app.route('/thumb/<int:img_id>', methods=['GET'])
 @flask_login.login_required
@@ -36,6 +38,7 @@ def thumb(img_id):
     bytestream = io.BytesIO(img_db.thumbnail)
     return flask.send_file(bytestream, mimetype="image/jpeg",
                            last_modified=img_db.mtime, cache_timeout=config.cache_max_sec)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -69,15 +72,18 @@ def login():
 
     return flask.render_template('login.html', form=form, current_user=flask_login.current_user)
 
+
 @app.route('/logout', methods=['POST'])
 def logout():
     flask_login.logout_user()
     flask.flash('Logged out successfully.')
     return flask.redirect(flask.url_for('index'))
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return user_manager.get_user(user_id)
+
 
 @app.after_request
 def modify_cache(r):
@@ -86,4 +92,4 @@ def modify_cache(r):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="192.168.0.216")

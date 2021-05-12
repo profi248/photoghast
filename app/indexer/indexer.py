@@ -88,12 +88,17 @@ def browse_folder(path, album=None):
 
                 try:
                     thumbnail = generate_thumbnail(entry.path)
+                    thumb_x = thumbnail[0]
+                    thumb_y = thumbnail[1]
+                    thumb_img = thumbnail[2]
                 except PIL.UnidentifiedImageError:
-                    thumbnail = None
+                    thumb_x = None
+                    thumb_y = None
+                    thumb_img = None
 
                 image = Image(path=entry.path, name=entry.name, creation=dto, mtime=datetime.datetime.fromtimestamp(entry.stat().st_mtime),
                               geo_lat=gps_lat, geo_lon=gps_lon, width=img_size[0], height=img_size[1], size=entry.stat().st_size,
-                              format=file_mime, album_id=album, thumbnail=thumbnail)
+                              format=file_mime, album_id=album, thumbnail=thumb_img, thumb_width=thumb_x, thumb_height=thumb_y)
 
                 session.merge(image)
                 if verbose:
