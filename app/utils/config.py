@@ -5,7 +5,7 @@ image_path = "test-images"
 debug = False
 
 default_username = "admin"
-default_pass = "pythonro ks"
+default_pass = "pythonrocks"
 
 thumb_jpeg_quality = 60
 thumb_target_size = 200
