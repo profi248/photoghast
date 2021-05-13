@@ -121,7 +121,7 @@ def browse_folder(path, album=None):
                     if not album:
                         # only add album for top level folders for now
                         new_album = Album(name=entry.name, virtual=False)
-                        session.merge(new_album)
+                        session.add(new_album)
                         if verbose:
                             print("[DB] flush")
                         session.flush()
@@ -132,8 +132,9 @@ def browse_folder(path, album=None):
                     if verbose:
                         print("[indexer] existing dir:", os.path.join(path, entry.name))
                     new_album_id = existing_album.id
-                    
-                
+
+                if verbose:
+                    print("[indexer] run browse_folder({}, {})".format(entry.path, new_album_id))
                 browse_folder(entry.path, new_album_id)
             elif not entry.name.startswith('.') and entry.is_file():
                 if verbose:
