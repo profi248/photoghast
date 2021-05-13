@@ -1,9 +1,10 @@
 secret = "ecKCVdTFJDsmQNsuLY7n49qsQB5BKKon9STreK9cL9XC3kduvY56izgJ2H2RkuCv"
+osm_nominatim_reverse_endpoint = "https://nominatim.openstreetmap.org/reverse"
 
 db_uri = "sqlite:///index3.db"
 image_path = "test-images"
 debug = True
-db_debug = False
+db_debug = True
 
 file_extensions_whitelist = ["jpg", "jpeg", "png"]
 
