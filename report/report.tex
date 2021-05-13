@@ -19,7 +19,7 @@
 
 \documentclass[czech]{template/pyt-report}
 
-\title{Výstižný název vaší semestrální práce}
+\title{Webová aplikace na organizaci fotografií \emph{photoghast}}
 
 \author{David Košťál}
 \affiliation{FIT ČVUT}
@@ -31,27 +31,70 @@
 
 \maketitle
 
-Strukturu sekcí reportu si pochopitelně můžete upravit, aby vám co nejlépe vyhovovala pro popis vaší práce.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Úvod}
-Definice problému/úkolu, který práce řeší\ldots
+Cílem této semestrální práce je vytvořit webovou aplikaci, která usnadní správu
+knihovny fotografií. Aplikace si nejprve zaindexuje adresář s fotkami, pro které
+si uloží metadata z EXIF a dalších zdrojů (mimo jiné datum pořízení, rozměry,
+GPS souřadnice) a vygeneruje náhledové obrázky. Všechny tyto údaje jsou uloženy do
+databáze (výchozí je SQLite, ale lze použít jiné možnosti). 
 
+Tyto fotografie je poté možné pohodlně prohlížet ve webové aplikaci v několika formách.
+Výchozí forma je kontinuální časová osy od nejnovějších k nejstarším obrázkům.
+Další zobrazení jsou alba, automaticky vytvořená podsložkami v hlavním adresáři.
+Posledním zobrazením jsou místa pořízení, kde jsou automaticky seskupené blízké fotografie
+(data pro tuto funkci se získávají s EXIF souřadnic).
 
+Pro přístup k knihovně je potřeba se přihlásit, aplikace disponuje jednoduchým
+systémem uživetelů, kde administrátoři mohou přidávat nové uživatele.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Vstupní data}
-Původ, proces získání, předzpracování, jejich omezení\ldots
+\section{Indexace obrázků}
+Aby bylo možné obrázky zobrazit v rozhraní, je potřeba je nejdříve zaindexovat
+a uložit do databáze. Jako rozhraní pro databázi je použita knihovna SQLAlchemy,
+která podporuje mnoho databází, v této aplikaci je ale momentálně použita databáze
+SQLite.
 
+Soubor \verb+indexer/indexer.py+ je zodpovědný za indaxci a po spuštění začně
+rekurzivně procházet všechny soubory a složky v zadaném adresáři. Pokud narazí
+na složku, uloží k všem obrázkům v této složce jméno této složky jako album obrázku.
+Z veškerých podporovaných obrázků (JPG, PNG) na které narazí, se pokusí extrahovat
+EXIF informace pomocí programu \verb+exiftool+ a zaznamenat je.
+
+Dále se obrázky s metadaty o poloze pokusí umístit do lokace. Nejprve zkusí, zda
+již neexistuje blízká lokace (nachází se v určité maximální vzdálenosti),
+kam by se obrázek mohl zařadit. Pokud není nalezena, založí se pro obrázek nová lokace.
+Pro každou lokaci se dotáže na OpenStreetMap Nominatim API, aby se pro souřadnice
+získala užitečná lokace.
+
+V neposlední řadě se také generují zmenšené náhledové obrázky, pomocí Numpy.
+Generátor náhledových obrázků spočítá zmenšení, aby se blížilo požadované velikosti
+a zároveň se příliš nedeformoval poměr stran. Je použita metoda primitivního 
+výběru pixelů bez interpolace.
+
+Pokud přibyly nebo ubyly nějaké obrázky od poslední indexace, vždy se přidají jenom změny.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Metody/postupy/algoritmy}
-Použité metody, jejich přizpůsobení, aplikace\ldots \\
-S jakými výzvami jste bojovali\ldots
+\section{Webová aplikace}
+Webová aplikace, postavená na knihovně Flask, nabídne přihlášeným uživatelům
+prohlížení indexované knihovny. Je organizovaná do stránek se režimy organizace fotek.
+Má cesty jak s HTML templaty, tak i cesty fungující jako API (pro získání náhledu 
+a celé fotografie pomocí ID, kde se buď získá z databáze, nebo načte přímo z disku).
+Kromě prohlížení fotek je pro administrátory možné vytvořit nové uživatele, a pro všechny
+uživatele je možné si změnit heslo.
 
+Pro práci s hesly je použita knihova bcrypt, která poskytuje bezpečné hashování
+a porovnávání hesel. Pro udržování přihlášení slouží knihovna Flask-Login. WTForms
+a Flask-WTF je knihovna pro generování formulářů, a chrání je před CSRF útoky.
+
+Webový frontend využívá knihovny Bootstrap pro CSS a Masonry pro mřížku fotek.
+Okno s plnou verzí po kliknutí zajišťuje knihovna PhotoSwipe Lightbox.
+Celý web je responzivní.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- VYSLEDKY
 \section{Výsledky}
-
-Jakých výsledků bylo dosaženo, co na ně melo vliv. Srovnání s očekáváním, \emph{diskuze nad výsledky} -- zvláště důležitá v případě, že něco vyšlo \emph{divně}.
+V aplikaci chybí velké množství funkcí, ale jako základ je bez problému použitelná.
+Použití velkou knihovnou fotografií by bez přidání dalších funkcí bylo ale pomalé.
+Se zvolenými Pythonovými nástroji se pracuje velmi pohodlně a přidávat funkce není problém.
+Největší problémy jsem měl s frontendovou částí webu, obzvlášť s rozložením mřířky fotek.
 
 \begin{figure}[h]
   \centering\leavevmode
