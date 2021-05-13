@@ -2,6 +2,7 @@ import sqlalchemy as sql
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 import requests
+from geopy.distance import geodesic
 
 from utils import config as config
 
@@ -32,5 +33,8 @@ def reverse_geocode(lat: float, lon: float):
         return info
 
     except (KeyError, requests.exceptions.RequestException) as e:
-        print("reverse gecode failed:", e)
+        print("reverse geocode failed:", e)
         return None
+
+def falls_within_radius(a, b):
+    return geodesic(a, b).kilometers < config.place_static_radius_km

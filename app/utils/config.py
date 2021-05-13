@@ -17,3 +17,5 @@ thumb_target_size_y = 400
 # thumb_scaling = 2
 
 cache_max_sec = 3600 * 24 * 7
+
+place_static_radius_km = 0.5

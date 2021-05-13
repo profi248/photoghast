@@ -4,6 +4,7 @@ import os
 import datetime
 import exiftool
 
+import utils.common
 import utils.config as config
 from utils.db_models import *
 from utils.common import get_db_session
@@ -54,19 +55,18 @@ def browse_folder(path, album=None):
                     continue
 
                 new_cnt += 1
+                exifdata = exif.get_metadata(entry.path)
+                if not exifdata:
+                    print("[indexer] warn: obtaining exif data from '{}' failed".format(entry.path))
 
-                try:
-                    exifdata = exif.get_metadata(entry.path)
-                except:
-                    exifdata = None
-                    print("[indexer] warn: exiftool error for '{}'".format(entry.path))
-
+                # get image mime type
                 try:
                     file_mime = exifdata['File:MIMEType']
                 except KeyError:
                     file_mime = "unknown"
                     print("[indexer] warn: exiftool unknown mime for '{}'".format(entry.path))
 
+                # get image dimensions
                 try:
                     if file_mime == "image/jpeg":
                         img_size = (exifdata['File:ImageWidth'], exifdata['File:ImageHeight'])
@@ -78,6 +78,7 @@ def browse_folder(path, album=None):
                     print("[indexer] warn: error getting image dimensions for '{}'".format(entry.path))
                     img_size = (0, 0)
 
+                # rotate the image's dimensions if the image has exif orientation info
                 try:
                     orientation = exifdata["EXIF:Orientation"]
 
@@ -90,10 +91,10 @@ def browse_folder(path, album=None):
                         img_size = (y, x)
                         if verbose:
                             print("[indexer] swapping image dimesions to account for exif orientation")
-
                 except KeyError:
                     orientation = None
 
+                # get image creation date from exif, with fallback to filesystem mtime
                 try:
                     dto = datetime.datetime.strptime(exifdata['EXIF:CreateDate'], '%Y:%m:%d %H:%M:%S')
                 except KeyError:
@@ -101,6 +102,7 @@ def browse_folder(path, album=None):
                         print("[indexer] info: image creation time from fs mtime")
                     dto = datetime.datetime.fromtimestamp(entry.stat().st_mtime)
 
+                # obtain gps tags from exif
                 try:
                     gps_lat = exifdata["EXIF:GPSLatitude"]
                     gps_lon = exifdata["EXIF:GPSLongitude"]
@@ -108,29 +110,54 @@ def browse_folder(path, album=None):
                     gps_lat = None
                     gps_lon = None
 
+                # if the photo has gps coordinates, assign it to a place
+                place_id = None
+                if gps_lat and gps_lon:
+                    places = session.query(Place.id, Place.base_location_lat, Place.base_location_lon).all()
+                    for place in places:
+                        place_coords = place.base_location_lat, place.base_location_lon
+                        photo_coords = gps_lat, gps_lon
+                        if utils.common.falls_within_radius(photo_coords, place_coords):
+                            place_id = place.id
+                            break
+
+                    if not place_id:
+                        geodata = utils.common.reverse_geocode(gps_lat, gps_lon)
+
+                        if geodata:
+                            place_name = geodata["name"]
+                        else:
+                            place_name = "location near {}, {}".format(gps_lat, gps_lon)
+
+                        place = Place(base_location_lat=gps_lat, base_location_lon=gps_lon, name=place_name)
+                        session.add(place)
+                        session.flush()
+                        place_id = place.id
+
+                # create a thumbnail
                 try:
                     if img_size == (0, 0):
                         raise ValueError
                     thumbnail = generate_thumbnail(entry.path)
                     thumb_x = thumbnail[0]
                     thumb_y = thumbnail[1]
-                    thumb_img = thumbnail[2]
+                    thumb_bytestream = thumbnail[2]
                 except (ValueError, PIL.UnidentifiedImageError):
                     thumb_x = None
                     thumb_y = None
-                    thumb_img = None
+                    thumb_bytestream = None
 
+                # save the image with the thumbnail
                 image = Image(path=entry.path, name=entry.name, creation=dto, mtime=datetime.datetime.fromtimestamp(entry.stat().st_mtime),
                               geo_lat=gps_lat, geo_lon=gps_lon, width=img_size[0], height=img_size[1], size=entry.stat().st_size,
-                              format=file_mime, album_id=album, thumbnail=thumb_img, thumb_width=thumb_x, thumb_height=thumb_y,
-                              exif_orientation=orientation)
+                              format=file_mime, album_id=album, thumbnail=thumb_bytestream, thumb_width=thumb_x, thumb_height=thumb_y,
+                              exif_orientation=orientation, place_id=place_id)
 
                 session.merge(image)
                 if verbose:
                     print("[indexer] new file:", entry.path, img_size)
 
             # add folders as photo albums
-            # todo might be broken with the existing check?
             elif not entry.name.startswith('.') and entry.is_dir():
                 existing_album = session.query(Album).filter(Album.name == entry.name).one_or_none()
                 if not existing_album:
@@ -175,7 +202,7 @@ for file in session.query(Image.id, Image.path).all():
         session.query(Image).filter(Image.id == file.id).delete()
     else:
         if verbose:
-            print("[indexer] checking file:", file.path)
+            print("[indexer] checking file: '{}'".format(file.path))
 
 session.query(LastUpdated).filter(LastUpdated.key == "fs_scan").update({LastUpdated.date: scan_started})
 
