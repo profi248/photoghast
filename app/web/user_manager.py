@@ -24,6 +24,7 @@ def add_user(username: str, passwd: str, permissions: int):
     try:
         db_session.add(new_user)
         db_session.commit()
+    # user already exists
     except sql.exc.IntegrityError:
         return False
 
