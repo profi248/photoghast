@@ -48,7 +48,6 @@ def places():
         else:
             thumb_pics_ids[place_db.id] = 0
 
-
     return flask.render_template('places.html', places=places_list,
                                  current_user=flask_login.current_user,
                                  thumb_pics_ids=thumb_pics_ids)

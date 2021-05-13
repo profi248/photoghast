@@ -35,6 +35,7 @@ else:
 nodes_cnt = 0
 new_cnt = 0
 
+
 # browse folders recursively
 def browse_folder(path, album=None):
     if not os.path.exists(path):

@@ -11,7 +11,14 @@ def login(username: str, passwd: str):
     user_db = db_session.query(models.User) \
         .filter(models.User.username == username).one_or_none()
 
-    passwd_user = passwd.encode(encoding="utf-8")
+    if check_user_passwd(user_db, passwd):
+        return user_db
+    else:
+        return None
+
+
+def check_user_passwd(user_db: models.User, passwd_user_str: str):
+    passwd_user = passwd_user_str.encode(encoding="utf-8")
 
     if user_db:
         invalid = False
@@ -22,9 +29,9 @@ def login(username: str, passwd: str):
         passwd_db = config.dummy_passwd
 
     if bcrypt.checkpw(passwd_user, passwd_db) and not invalid:
-        return user_db
+        return True
     else:
-        return None
+        return False
 
 
 def get_user(user_id):
@@ -39,7 +46,7 @@ def get_user(user_id):
 
 
 class UserManager(flask_login.UserMixin):
-    def __init__(self, user_db):
+    def __init__(self, user_db: models.User):
         self.name = user_db.username
         self.permissions = user_db.permissions
         self.id = user_db.id
