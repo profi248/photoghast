@@ -125,9 +125,14 @@ def browse_folder(path, album=None):
                         geodata = utils.common.reverse_geocode(gps_lat, gps_lon)
 
                         if geodata:
-                            place_name = geodata["name"]
+                            if "short_name" in geodata and geodata["short_name"]:
+                                place_name = geodata["short_name"]
+                            else:
+                                place_name = geodata["name"]
                         else:
                             place_name = "location near {}, {}".format(gps_lat, gps_lon)
+                            if verbose:
+                                print("[indexer] warn: geocoding for '{}' failed".format(entry.path))
 
                         place = Place(base_location_lat=gps_lat, base_location_lon=gps_lon, name=place_name)
                         session.add(place)
@@ -210,8 +215,8 @@ if verbose:
     print("[indexer] updated last scan time")
 postdelete_count = session.query(Image.id).count()
 
-if verbose:
-    print("[DB] commit")
+
+print("[indexer] saving index to database")
 session.commit()
 
 scan_ended = datetime.datetime.now()
