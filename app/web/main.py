@@ -28,6 +28,11 @@ def index():
     else:
         return flask.render_template('index.html', current_user=flask_login.current_user)
 
+@app.route('/albums', methods=['GET'])
+@flask_login.login_required
+def albums():
+    return flask.render_template('index.html', current_user=flask_login.current_user)
+
 
 @app.route('/thumb/<int:img_id>', methods=['GET'])
 @flask_login.login_required
