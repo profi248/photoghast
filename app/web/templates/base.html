@@ -18,7 +18,7 @@
                 {% if current_user.is_authenticated %}
                 <div class="navbar-nav">
                     <a class="nav-link{% if request.url_rule.endpoint == "index" %} active{% endif %}" href="{{ url_for('index') }}">stream</a>
-                    <a class="nav-link{% if request.url_rule.endpoint == "albums" %} active{% endif %}" href="{{ url_for('albums') }}">albums</a>
+                    <a class="nav-link{% if request.url_rule.endpoint == "albums" or request.url_rule.endpoint == "album" %} active{% endif %}" href="{{ url_for('albums') }}">albums</a>
                 </div>
                 {% endif %}
                 <div class="d-flex ms-auto align-items-center">

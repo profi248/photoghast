@@ -27,10 +27,26 @@ def index():
     else:
         return flask.render_template('index.html', current_user=flask_login.current_user)
 
+
 @app.route('/albums', methods=['GET'])
 @flask_login.login_required
 def albums():
-    return flask.render_template('index.html', current_user=flask_login.current_user)
+    db_session = get_db_session()
+    albums_list = db_session.query(models.Album.id, models.Album.name).all()
+    thumb_pics_ids = {}
+    for album_db in albums_list:
+        thumb_pics_ids[album_db.id] = db_session.query(models.Image.id).filter(models.Image.album_id == album_db.id).first().id
+    return flask.render_template('albums.html', albums=albums_list, current_user=flask_login.current_user, thumb_pics_ids=thumb_pics_ids)
+
+
+@app.route('/album/<int:album_id>', methods=['GET'])
+@flask_login.login_required
+def album(album_id):
+    db_session = get_db_session()
+    images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height,
+                              models.Image.width, models.Image.height) \
+        .filter(models.Image.album_id == album_id).order_by(models.Image.creation.desc()).all()
+    return flask.render_template('library.html', current_user=flask_login.current_user, images=images)
 
 
 @app.route('/thumb/<int:img_id>', methods=['GET'])

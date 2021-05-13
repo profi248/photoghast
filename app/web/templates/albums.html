@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        {% for album in albums %}
+            <div class="col-sm-6 col-lg-4 col-xl-3 my-2">
+                <a class="link-dark text-decoration-none text-center" href="{{ url_for("album", album_id=album.id) }}">
+                    <div class="card">
+                        <img style="width: 100%; height: 250px; object-fit: cover;"
+                             src="{{ url_for("thumb", img_id=thumb_pics_ids[album.id]) }}"
+                             alt="{{ album.name }}">
+                        <div class="card-body">
+                            <h5 style="margin-bottom: 0" class="card-title">{{ album.name }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
