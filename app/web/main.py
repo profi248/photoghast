@@ -28,6 +28,31 @@ def index():
         return flask.render_template('index.html', current_user=flask_login.current_user)
 
 
+@app.route('/places', methods=['GET'])
+@flask_login.login_required
+def places():
+    db_session = get_db_session()
+    places_list = db_session.query(models.Place.id, models.Place.name).all()
+    thumb_pics_ids = {}
+    for place_db in places_list:
+        thumb_pics_ids[place_db.id] = db_session.query(models.Image.id).filter(models.Image.place_id == place_db.id).first().id
+    return flask.render_template('places.html', places=places_list, current_user=flask_login.current_user, thumb_pics_ids=thumb_pics_ids)
+
+
+@app.route('/place/<int:place_id>', methods=['GET'])
+@flask_login.login_required
+def place(place_id):
+    db_session = get_db_session()
+    images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height,
+                              models.Image.width, models.Image.height) \
+        .filter(models.Image.place_id == place_id).order_by(models.Image.creation.desc()).all()
+    place_db = db_session.query(models.Place.name).filter(models.Place.id == place_id).one_or_none()
+    if not place_db:
+        return flask.abort(404)
+
+    return flask.render_template('library.html', title=place_db.name, current_user=flask_login.current_user, images=images)
+
+
 @app.route('/albums', methods=['GET'])
 @flask_login.login_required
 def albums():
@@ -46,7 +71,12 @@ def album(album_id):
     images = db_session.query(models.Image.id, models.Image.name, models.Image.thumb_width, models.Image.thumb_height,
                               models.Image.width, models.Image.height) \
         .filter(models.Image.album_id == album_id).order_by(models.Image.creation.desc()).all()
-    return flask.render_template('library.html', current_user=flask_login.current_user, images=images)
+
+    album_db = db_session.query(models.Album.name).filter(models.Album.id == album_id).one_or_none()
+    if not album_db:
+        return flask.abort(404)
+
+    return flask.render_template('library.html', title=album_db.name, current_user=flask_login.current_user, images=images)
 
 
 @app.route('/thumb/<int:img_id>', methods=['GET'])

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if title is defined %}
+        <h1>{{ title }}</h1>
+    {% endif %}
     <div class="row pswp-gallery pswp-gallery--single-column" id="g2">
         {% for img in images %}
             <div class="col-sm-6 col-lg-4 col-xl-3 my-2" style="height: auto">
