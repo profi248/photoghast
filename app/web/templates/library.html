@@ -17,7 +17,7 @@
             </div>
         {% endfor %}
     </div>
-    <script src="/static/js/lazysizes.min.js"></script>
+    <script src="/static/js/lib/lazysizes.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
     <script>
         var mason = new Masonry(document.querySelector("#g2"), {
@@ -31,7 +31,7 @@
 
     <script type="module">
         // Include Lightbox
-        import PhotoSwipeLightbox from '/static/js/photoswipe/photoswipe-lightbox.esm.min.js';
+        import PhotoSwipeLightbox from '/static/js/lib/photoswipe/photoswipe-lightbox.esm.min.js';
 
         const lightbox = new PhotoSwipeLightbox({
             // may select multiple "galleries"
@@ -42,11 +42,11 @@
 
             // Include PhotoSwipe Core
             // and use absolute path (that starts with http(s)://)
-            pswpModule: '/static/js/photoswipe/photoswipe.esm.min.js',
+            pswpModule: '/static/js/lib/photoswipe/photoswipe.esm.min.js',
 
             // Include CSS file,
             // (if you haven't included in via <link>)
-            pswpCSS: '/static/js/photoswipe/photoswipe.css'
+            pswpCSS: '/static/js/lib/photoswipe/photoswipe.css'
         });
         lightbox.init();
     </script>
