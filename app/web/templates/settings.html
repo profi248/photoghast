@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="mb-3">settings</h1>
+    <h3>change password</h3>
+    <div class="row">
+        <form class="col-sm-6 col-lg-4" method="POST" action="{{ url_for('change_passwd') }}">
+            {{ form.csrf_token }}
+            <div class="mb-3">
+                {{ form.old_passwd.label(class_="form-label") }}
+                {{ form.old_passwd(class_="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.new_passwd.label(class_="form-label") }}
+                {{ form.new_passwd(class_="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.new_passwd_repeat.label(class_="form-label") }}
+                {{ form.new_passwd_repeat(class_="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">change password</button>
+        </form>
+    </div>
+{% endblock %}

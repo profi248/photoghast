@@ -20,6 +20,10 @@
                     <a class="nav-link{% if request.url_rule.endpoint == "index" %} active{% endif %}" href="{{ url_for('index') }}">stream</a>
                     <a class="nav-link{% if request.url_rule.endpoint == "albums" or request.url_rule.endpoint == "album" %} active{% endif %}" href="{{ url_for('albums') }}">albums</a>
                     <a class="nav-link{% if request.url_rule.endpoint == "places" or request.url_rule.endpoint == "place" %} active{% endif %}" href="{{ url_for('places') }}">places</a>
+                    <a class="nav-link{% if request.url_rule.endpoint == "settings" %} active{% endif %}" href="{{ url_for('settings') }}">settings</a>
+                    {% if current_user.permissions >= 1 %}
+                        <a class="nav-link{% if request.url_rule.endpoint == "admin" %} active{% endif %}" href="{{ url_for('admin') }}">admin</a>
+                    {% endif %}
                 </div>
                 {% endif %}
                 <div class="d-flex ms-auto align-items-center">
@@ -34,8 +38,8 @@
         </div>
     </nav>
     <main class="container pt-4 flex-shrink-0">
-        {% for message in get_flashed_messages() %}
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>

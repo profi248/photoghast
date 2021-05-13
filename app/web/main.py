@@ -149,6 +149,111 @@ def image(img_id):
                            cache_timeout=config.cache_max_sec)
 
 
+@app.route('/change-password', methods=['POST'])
+@flask_login.login_required
+def change_passwd():
+    form = forms.ChangePasswordForm()
+    if form.validate_on_submit():
+        try:
+            old_passwd = flask.request.form["old_passwd"]
+            new_passwd = flask.request.form["new_passwd"]
+            new_passwd_repeat = flask.request.form["new_passwd_repeat"]
+        except KeyError:
+            return flask.abort(400)
+
+        user_db = user_manager.get_user_db(flask_login.current_user.get_id())
+        if not user_manager.check_user_passwd(user_db, old_passwd):
+            flask.flash('Old password is incorrect.', 'danger')
+            return flask.redirect(flask.url_for('settings'))
+
+        if new_passwd != new_passwd_repeat:
+            flask.flash('Passwords do not match.', 'danger')
+            return flask.redirect(flask.url_for('settings'))
+
+        if not user_manager.check_password_requirements(new_passwd):
+            flask.flash('Changing password failed,'
+                        ' minimum password length is 8 characters.', 'danger')
+            return flask.redirect(flask.url_for('settings'))
+
+        result = user_manager.change_passwd(user_db, new_passwd)
+
+        if result:
+            flask.flash('Password changed successfully.', 'info')
+        else:
+            flask.flash('Password changing failed.', 'danger')
+
+        return flask.redirect(flask.url_for('settings'))
+
+    for field_name, error_messages in form.errors.items():
+        for err in error_messages:
+            flask.flash('{}: {}'.format(field_name, err), 'danger')
+
+    flask.redirect(flask.url_for('settings'))
+
+
+@app.route('/add-user', methods=['POST'])
+@flask_login.login_required
+def add_user():
+    if flask_login.current_user.permissions <= 0:
+        return flask.abort(401)
+
+    form = forms.AddUserForm()
+    if form.validate_on_submit():
+        try:
+            username = flask.request.form["username"]
+            passwd = flask.request.form["passwd"]
+        except KeyError:
+            return flask.abort(400)
+
+        try:
+            admin_perm = flask.request.form["admin"]
+        except KeyError:
+            admin_perm = False
+
+        if not user_manager.check_password_requirements(passwd):
+            flask.flash('Adding user failed, minimum password length'
+                        ' is 8 characters.', 'danger')
+            return flask.redirect(flask.url_for('admin'))
+
+        permissions = 1 if admin_perm else 0
+        result = user_manager.add_user(username=username, passwd=passwd,
+                                       permissions=permissions)
+
+        if result:
+            flask.flash('User added successfully.', 'info')
+        else:
+            flask.flash('Adding user failed, name already taken.', 'danger')
+
+        return flask.redirect(flask.url_for('admin'))
+
+    for field_name, error_messages in form.errors.items():
+        for err in error_messages:
+            flask.flash('{}: {}'.format(field_name, err), 'danger')
+
+    flask.redirect(flask.url_for('admin'))
+
+
+@app.route('/admin', methods=['GET'])
+@flask_login.login_required
+def admin():
+    if flask_login.current_user.permissions <= 0:
+        return flask.abort(401)
+
+    form = forms.AddUserForm()
+
+    return flask.render_template('admin.html', form=form,
+                                 current_user=flask_login.current_user)
+
+
+@app.route('/settings', methods=['GET'])
+@flask_login.login_required
+def settings():
+    form = forms.ChangePasswordForm()
+
+    return flask.render_template('settings.html', form=form,
+                                 current_user=flask_login.current_user)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
@@ -169,11 +274,15 @@ def login():
             user = user_manager.UserManager(user)
             flask_login.login_user(user, remember=remember)
         else:
-            flask.flash('Username or password is incorrect.')
+            flask.flash('Username or password is incorrect.', 'warning')
             return flask.render_template('login.html', form=form,
                                          current_user=flask_login.current_user)
 
         return flask.redirect(flask.url_for('index'))
+
+    for field_name, error_messages in form.errors.items():
+        for err in error_messages:
+            flask.flash('{}: {}'.format(field_name, err), 'danger')
 
     return flask.render_template('login.html', form=form,
                                  current_user=flask_login.current_user)
@@ -182,7 +291,7 @@ def login():
 @app.route('/logout', methods=['POST'])
 def logout():
     flask_login.logout_user()
-    flask.flash('Logged out successfully.')
+    flask.flash('Logged out successfully.', 'info')
     return flask.redirect(flask.url_for('index'))
 
 

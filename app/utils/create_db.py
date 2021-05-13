@@ -16,6 +16,6 @@ passwd = config.default_pass
 username = config.default_username
 passwd_b = passwd.encode(encoding="utf-8")
 hashed = bcrypt.hashpw(passwd_b, bcrypt.gensalt())
-new_album = models.User(username=username, password=hashed, permissions=0)
-db_session.merge(new_album)
+new_user = models.User(username=username, password=hashed, permissions=1)
+db_session.add(new_user)
 db_session.commit()
