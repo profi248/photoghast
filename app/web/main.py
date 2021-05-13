@@ -3,7 +3,6 @@ import flask_login
 import io
 import os
 
-import web_utils
 import forms
 import user_manager
 import utils.config as config
@@ -38,10 +37,17 @@ def index():
 def places():
     db_session = get_db_session()
     places_list = db_session.query(models.Place.id, models.Place.name).all()
+
     thumb_pics_ids = {}
     for place_db in places_list:
-        thumb_pics_ids[place_db.id] = db_session.query(models.Image.id) \
-            .filter(models.Image.place_id == place_db.id).first().id
+        result = db_session.query(models.Image.id) \
+            .filter(models.Image.place_id == place_db.id).first()
+
+        if result:
+            thumb_pics_ids[place_db.id] = result.id
+        else:
+            thumb_pics_ids[place_db.id] = 0
+
 
     return flask.render_template('places.html', places=places_list,
                                  current_user=flask_login.current_user,
@@ -77,8 +83,13 @@ def albums():
     albums_list = db_session.query(models.Album.id, models.Album.name).all()
     thumb_pics_ids = {}
     for album_db in albums_list:
-        thumb_pics_ids[album_db.id] = db_session.query(models.Image.id) \
-            .filter(models.Image.album_id == album_db.id).first().id
+        result = db_session.query(models.Image.id) \
+            .filter(models.Image.album_id == album_db.id).first()
+        if result:
+            thumb_pics_ids[album_db.id] = result.id
+        else:
+            thumb_pics_ids[album_db.id] = 0
+
     return flask.render_template('albums.html', albums=albums_list,
                                  current_user=flask_login.current_user,
                                  thumb_pics_ids=thumb_pics_ids)
@@ -132,7 +143,7 @@ def image(img_id):
     if not img_db:
         return flask.abort(404)
 
-    file = os.path.join(get_project_root(), img_db.path)
+    file = os.path.join(config.image_path, img_db.path)
 
     return flask.send_file(file, mimetype="image/jpeg",
                            last_modified=img_db.mtime,
@@ -163,12 +174,7 @@ def login():
             return flask.render_template('login.html', form=form,
                                          current_user=flask_login.current_user)
 
-        redir = flask.request.args.get('redir')
-
-        if not web_utils.is_safe_url(redir):
-            return flask.abort(400)
-
-        return flask.redirect(redir or flask.url_for('index'))
+        return flask.redirect(flask.url_for('index'))
 
     return flask.render_template('login.html', form=form,
                                  current_user=flask_login.current_user)

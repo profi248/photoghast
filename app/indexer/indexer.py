@@ -8,11 +8,11 @@ import utils.common
 import utils.config as config
 from utils.db_models import *
 from utils.common import get_db_session
-from thumbnail import generate_thumbnail
+from thumbnail import generate_thumbnail_from_path
 
 
 verbose = config.debug
-path = config.image_path
+scan_path = config.image_path
 
 session = get_db_session()
 
@@ -34,7 +34,6 @@ else:
 
 nodes_cnt = 0
 new_cnt = 0
-
 
 # browse folders recursively
 def browse_folder(path, album=None):
@@ -175,18 +174,24 @@ def browse_folder(path, album=None):
                 try:
                     if img_size == (0, 0):
                         raise ValueError
-                    thumbnail = generate_thumbnail(entry.path)
+
+                    thumbnail = generate_thumbnail_from_path(entry.path)
+
+                    if not thumbnail:
+                        raise ValueError
+
                     thumb_x = thumbnail[0]
                     thumb_y = thumbnail[1]
                     thumb_bytestream = thumbnail[2]
-                except (ValueError, PIL.UnidentifiedImageError):
+                except ValueError:
                     thumb_x = None
                     thumb_y = None
                     thumb_bytestream = None
 
                 # save the image with the thumbnail
                 mtime = entry.stat().st_mtime
-                image = Image(path=entry.path, name=entry.name, creation=dto,
+                relpath = os.path.relpath(entry.path, scan_path)
+                image = Image(path=relpath, name=entry.name, creation=dto,
                               mtime=datetime.fromtimestamp(mtime),
                               geo_lat=gps_lat, geo_lon=gps_lon,
                               width=img_size[0], height=img_size[1],
@@ -239,7 +244,7 @@ if __name__ == "__main__":
     print("[indexer] starting scan")
     exif = exiftool.ExifTool()
     exif.start()
-    browse_folder(path)
+    browse_folder(scan_path)
     exif.terminate()
     session.commit()
     if verbose:
@@ -248,7 +253,7 @@ if __name__ == "__main__":
     print("[indexer] scanning for deleted files")
     predelete_count = session.query(Image.id).count()
     for file in session.query(Image.id, Image.path).all():
-        if not os.path.isfile(file.path):
+        if not os.path.isfile(os.path.join(scan_path, file.path)):
             if verbose:
                 print("[indexer] deleted file: '{}'".format(file.path))
             session.query(Image).filter(Image.id == file.id).delete()
