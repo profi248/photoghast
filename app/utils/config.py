@@ -10,6 +10,7 @@ file_extensions_whitelist = ["jpg", "jpeg", "png"]
 
 default_username = "admin"
 default_pass = "pythonrocks"
+dummy_passwd = b'$2b$12$0KnC/RBTaGH0E9UXMl.Fnebyrf.lPw3dqGRjXv7P.ofiEAGbeWRDi'
 
 thumb_jpeg_quality = 75
 thumb_target_size_x = 350

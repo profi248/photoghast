@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -52,8 +53,10 @@ class Image(Base):
     thumbnail = sql.Column(sql.LargeBinary(), nullable=True)
     thumb_width = sql.Column(sql.Integer, nullable=True)
     thumb_height = sql.Column(sql.Integer, nullable=True)
-    album_id = sql.Column(sql.Integer, sql.ForeignKey("albums.id"), nullable=True, index=True)
-    place_id = sql.Column(sql.Integer, sql.ForeignKey("places.id"), nullable=True, index=True)
+    album_id = sql.Column(sql.Integer, sql.ForeignKey("albums.id"),
+                          nullable=True, index=True)
+    place_id = sql.Column(sql.Integer, sql.ForeignKey("places.id"),
+                          nullable=True, index=True)
     album = relationship(Album, primaryjoin=album_id == Album.id)
     location = relationship(Place, primaryjoin=place_id == Place.id)
 

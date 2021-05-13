@@ -2,12 +2,14 @@ import flask_login
 import bcrypt
 
 import utils.db_models as models
+import utils.config as config
 from utils.common import get_db_session
 
 
 def login(username: str, passwd: str):
     db_session = get_db_session()
-    user_db = db_session.query(models.User).filter(models.User.username == username).one_or_none()
+    user_db = db_session.query(models.User) \
+        .filter(models.User.username == username).one_or_none()
 
     passwd_user = passwd.encode(encoding="utf-8")
 
@@ -17,21 +19,24 @@ def login(username: str, passwd: str):
     else:
         # compare with dummy password to prevent timing attacks
         invalid = True
-        passwd_db = b'$2b$12$0KnC/RBTaGH0E9UXMl.Fnebyrf.lPw3dqGRjXv7P.ofiEAGbeWRDi'
+        passwd_db = config.dummy_passwd
 
     if bcrypt.checkpw(passwd_user, passwd_db) and not invalid:
         return user_db
     else:
         return None
 
+
 def get_user(user_id):
     db_session = get_db_session()
     id_int = int(user_id)
-    user_db = db_session.query(models.User).filter(models.User.id == id_int).one_or_none()
+    user_db = db_session.query(models.User).filter(models.User.id == id_int) \
+        .one_or_none()
     if user_db:
         return UserManager(user_db)
     else:
         return None
+
 
 class UserManager(flask_login.UserMixin):
     def __init__(self, user_db):

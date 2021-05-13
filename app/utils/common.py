@@ -6,6 +6,7 @@ from geopy.distance import geodesic
 
 from utils import config as config
 
+
 def get_db_session():
     db_engine = sql.create_engine(config.db_uri, echo=config.db_debug)
     session = sessionmaker(bind=db_engine)
@@ -16,12 +17,14 @@ def get_db_session():
 def get_project_root():
     return Path(__file__).parent.parent
 
+
 def reverse_geocode(lat: float, lon: float):
     payload = {"lat": lat, "lon": lon, "format": "jsonv2"}
     headers = {"user-agent": "photoghast"}
 
     try:
-        r = requests.get(config.osm_nominatim_reverse_endpoint, params=payload, headers=headers)
+        r = requests.get(config.osm_nominatim_reverse_endpoint, params=payload,
+                         headers=headers)
         data = r.json()
 
         info = {
@@ -35,6 +38,7 @@ def reverse_geocode(lat: float, lon: float):
     except (KeyError, requests.exceptions.RequestException) as e:
         print("reverse geocode failed:", e)
         return None
+
 
 def falls_within_radius(a, b):
     return geodesic(a, b).kilometers < config.place_static_radius_km
