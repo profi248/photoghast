@@ -16,7 +16,6 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = config.secret
 
-
 @app.route('/', methods=['GET'])
 def index():
     if flask_login.current_user.is_authenticated:
@@ -113,4 +112,4 @@ def modify_cache(r):
 
 
 if __name__ == '__main__':
-    app.run(host="192.168.0.216")
+    app.run()
