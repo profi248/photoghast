@@ -1,14 +1,17 @@
 import numpy as np
 import io
-from PIL import Image
+from PIL import Image, ImageOps
 
 import utils.config as config
 
 def generate_thumbnail(path: str):
+
     desired_x = config.thumb_target_size_x
     desired_y = config.thumb_target_size_y
 
     img = Image.open(path)
+    img = ImageOps.exif_transpose(img)
+
     array = np.asarray(img)
     y, x, _ = array.shape
     coefficient_x = round(x / desired_x)

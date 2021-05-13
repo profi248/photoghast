@@ -35,6 +35,7 @@ class Image(Base):
     size = sql.Column(sql.BigInteger)
     geo_lat = sql.Column(sql.Float(precision='15,10'), nullable=True)
     geo_lon = sql.Column(sql.Float(precision='15,10'), nullable=True)
+    exif_orientation = sql.Column(sql.Integer)
     format = sql.Column(sql.String(64))
     thumbnail = sql.Column(sql.LargeBinary())
     thumb_width = sql.Column(sql.Integer)

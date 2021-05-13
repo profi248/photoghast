@@ -79,6 +79,22 @@ def browse_folder(path, album=None):
                     img_size = (0, 0)
 
                 try:
+                    orientation = exifdata["EXIF:Orientation"]
+
+                    if orientation != 1:
+                        if verbose:
+                            print("[indexer] non-default exif orientation tag:", orientation)
+
+                    if 5 <= orientation <= 8:  # image is flipped on its side - exif orientation 5, 6, 7 or 8
+                        x, y = img_size
+                        img_size = (y, x)
+                        if verbose:
+                            print("[indexer] swapping image dimesions to account for exif orientation")
+
+                except KeyError:
+                    orientation = None
+
+                try:
                     dto = datetime.datetime.strptime(exifdata['EXIF:CreateDate'], '%Y:%m:%d %H:%M:%S')
                 except KeyError:
                     if verbose:
@@ -106,7 +122,8 @@ def browse_folder(path, album=None):
 
                 image = Image(path=entry.path, name=entry.name, creation=dto, mtime=datetime.datetime.fromtimestamp(entry.stat().st_mtime),
                               geo_lat=gps_lat, geo_lon=gps_lon, width=img_size[0], height=img_size[1], size=entry.stat().st_size,
-                              format=file_mime, album_id=album, thumbnail=thumb_img, thumb_width=thumb_x, thumb_height=thumb_y)
+                              format=file_mime, album_id=album, thumbnail=thumb_img, thumb_width=thumb_x, thumb_height=thumb_y,
+                              exif_orientation=orientation)
 
                 session.merge(image)
                 if verbose:
