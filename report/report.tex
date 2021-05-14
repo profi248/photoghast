@@ -37,90 +37,87 @@ Cílem této semestrální práce je vytvořit webovou aplikaci, která usnadní
 knihovny fotografií. Aplikace si nejprve zaindexuje adresář s fotkami, pro které
 si uloží metadata z EXIF a dalších zdrojů (mimo jiné datum pořízení, rozměry,
 GPS souřadnice) a vygeneruje náhledové obrázky. Všechny tyto údaje jsou uloženy do
-databáze (výchozí je SQLite, ale lze použít jiné možnosti). 
+databáze (výchozí je \href{https://www.sqlite.org/index.html}{SQLite},
+ale lze použít jiné možnosti). 
 
 Tyto fotografie je poté možné pohodlně prohlížet ve webové aplikaci v několika formách.
-Výchozí forma je kontinuální časová osy od nejnovějších k nejstarším obrázkům.
+Výchozí forma je kontinuální časová osa od nejnovějších k nejstarším obrázkům.
 Další zobrazení jsou alba, automaticky vytvořená podsložkami v hlavním adresáři.
 Posledním zobrazením jsou místa pořízení, kde jsou automaticky seskupené blízké fotografie
-(data pro tuto funkci se získávají s EXIF souřadnic).
+(data pro tuto funkci se získávají z EXIF souřadnic).
 
-Pro přístup k knihovně je potřeba se přihlásit, aplikace disponuje jednoduchým
-systémem uživetelů, kde administrátoři mohou přidávat nové uživatele.
+Pro přístup k webové knihovně je potřeba se přihlásit, aplikace disponuje jednoduchým
+systémem uživatelů, kde administrátoři mohou přidávat nové uživatele.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Indexace obrázků}
-Aby bylo možné obrázky zobrazit v rozhraní, je potřeba je nejdříve zaindexovat
-a uložit do databáze. Jako rozhraní pro databázi je použita knihovna SQLAlchemy,
-která podporuje mnoho databází, v této aplikaci je ale momentálně použita databáze
-SQLite.
+Aby bylo možné obrázky zobrazit v rozhraní, je potřeba je nejprve zaindexovat
+a uložit do databáze. Jako rozhraní pro databázi je použita knihovna 
+\href{https://www.sqlalchemy.org}{SQLAlchemy}, která podporuje mnoho databází,
+v této aplikaci je ale momentálně použita databáze SQLite.
 
-Soubor \verb+indexer/indexer.py+ je zodpovědný za indaxci a po spuštění začně
+Soubor \verb+indexer/indexer.py+ je zodpovědný za indexci a po spuštění začně
 rekurzivně procházet všechny soubory a složky v zadaném adresáři. Pokud narazí
-na složku, uloží k všem obrázkům v této složce jméno této složky jako album obrázku.
+na složku, uloží ke všem obrázkům ve složce její jméno jako album obrázku.
 Z veškerých podporovaných obrázků (JPG, PNG) na které narazí, se pokusí extrahovat
-EXIF informace pomocí programu \verb+exiftool+ a zaznamenat je.
+EXIF informace pomocí programu \href{https://exiftool.org/}{exiftool} a zaznamenat je.
 
 Dále se obrázky s metadaty o poloze pokusí umístit do lokace. Nejprve zkusí, zda
 již neexistuje blízká lokace (nachází se v určité maximální vzdálenosti),
 kam by se obrázek mohl zařadit. Pokud není nalezena, založí se pro obrázek nová lokace.
-Pro každou lokaci se dotáže na OpenStreetMap Nominatim API, aby se pro souřadnice
-získala užitečná lokace.
+Pro každou lokaci se dotáže na \href{https://nominatim.org/}{OpenStreetMap Nominatim API},
+aby se pro souřadnice získala užitečná lokace. Experimentováním jsem došel k nastavení,
+které neposílá přesné souřadnice z důvodu ochrany soukromí, ale zároveň poskytuje užitečné polohy.
 
-V neposlední řadě se také generují zmenšené náhledové obrázky, pomocí Numpy.
+V neposlední řadě se také generují zmenšené náhledové obrázky pomocí 
+\href{https://numpy.org/}{Numpy}.
 Generátor náhledových obrázků spočítá zmenšení, aby se blížilo požadované velikosti
 a zároveň se příliš nedeformoval poměr stran. Je použita metoda primitivního 
-výběru pixelů bez interpolace.
+výběru pixelů bez interpolace. Indexace podporuje i obrázky s rotací v EXIF metadatch.
 
 Pokud přibyly nebo ubyly nějaké obrázky od poslední indexace, vždy se přidají jenom změny.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Webová aplikace}
-Webová aplikace, postavená na knihovně Flask, nabídne přihlášeným uživatelům
-prohlížení indexované knihovny. Je organizovaná do stránek se režimy organizace fotek.
-Má cesty jak s HTML templaty, tak i cesty fungující jako API (pro získání náhledu 
-a celé fotografie pomocí ID, kde se buď získá z databáze, nebo načte přímo z disku).
-Kromě prohlížení fotek je pro administrátory možné vytvořit nové uživatele, a pro všechny
-uživatele je možné si změnit heslo.
+Webová součást, postavená na knihovně \href{https://flask.pocoo.org/}{Flask}, nabídne
+přihlášeným uživatelům prohlížení indexované knihovny. Je rozdělená do stránek
+s režimy organizace fotek.
+Má cesty jak s HTML templaty, tak i cesty fungující jako API pro získání dat přes 
+identifikátor (například pro získání náhledu fotografie -- ten se získá z databáze
+nebo načtení fotky v plném rozlišení -- ta se načte přímo z disku). Kromě prohlížení
+fotek je pro administrátory možné vytvořit nové uživatele, a každý uživatel si
+může změnit heslo.
 
-Pro práci s hesly je použita knihova bcrypt, která poskytuje bezpečné hashování
-a porovnávání hesel. Pro udržování přihlášení slouží knihovna Flask-Login. WTForms
-a Flask-WTF je knihovna pro generování formulářů, a chrání je před CSRF útoky.
+Pro práci s hesly je použita knihova \href{https://github.com/pyca/bcrypt/}{bcrypt},
+která poskytuje bezpečné hashování a porovnávání hesel.
+Pro udržování přihlášení slouží knihovna \href{https://github.com/maxcountryman/flask-login}{Flask-Login}.
+\href{https://github.com/wtforms/wtforms}{WTForms} a \href{https://github.com/lepture/flask-wtf}{Flask-WTF}
+jsou použité knihovny pro generování formulářů, a jejich ochranou před CSRF útoky.
+Sdílené databázové modely z SQLAlchemy mezi indexerem a webem výrazně zjednodušují
+práci s databází a údržbu kódu.
 
-Webový frontend využívá knihovny Bootstrap pro CSS a Masonry pro mřížku fotek.
+Webový frontend využívá knihovny \href{https://getbootstrap.com/}{Bootstrap} pro CSS
+a \href{https://masonry.desandro.com/}{Masonry} pro mřížku fotek.
 Okno s plnou verzí po kliknutí zajišťuje knihovna PhotoSwipe Lightbox.
 Celý web je responzivní.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- VYSLEDKY
 \section{Výsledky}
-V aplikaci chybí velké množství funkcí, ale jako základ je bez problému použitelná.
-Použití velkou knihovnou fotografií by bez přidání dalších funkcí bylo ale pomalé.
-Se zvolenými Pythonovými nástroji se pracuje velmi pohodlně a přidávat funkce není problém.
-Největší problémy jsem měl s frontendovou částí webu, obzvlášť s rozložením mřířky fotek.
-
-\begin{figure}[h]
-  \centering\leavevmode
-  \includegraphics[width=.45\linewidth]{template/img/fit-logo-cz.pdf}\vskip-0.5cm
-  \caption{Vliv parametru \emph{Y}}
-  \label{fig:par-y}
-\end{figure}
-\begin{figure}[h]
-  \centering\leavevmode
-  \includegraphics[width=.45\linewidth]{template/img/fit-logo-en.pdf}\vskip-0.5cm
-  \caption{Vliv parametru \emph{X}}
-  \label{fig:par-x}
-\end{figure}
-
-Jak je z ilustrací \ref{fig:par-y} a \ref{fig:par-x} patrné, není to totéž, protože\ldots
-
+V aplikaci chybí velké množství funkcí, ale jako základ je bez problému použitelná, ovšem
+použití s velkou knihovnou fotografií by bez přidání dalších optimalizací bylo pomalé.
+Se zvolenými Pythonovými nástroji se pracuje velmi pohodlně a přidávat funkce není problém,
+největší problémy jsem měl s frontendovou částí webu, obzvlášť s rozložením mřížky fotek.
+Další věcí, která nebyla úplně přímočará byly unit testy, z povahy programu není jedoduché
+oddělit komponenty, aby se daly testovat.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- ZAVER
 \section{Závěr}
-K čemu to bylo/je dobré, jak to půjde využít dále, co by šlo ještě vylepšit\ldots 
-
+Myslím si, že photoghast může být dobrou alternativou pro cloudové služby jako Fotky Google,
+pro uživatele, kteří mají svoje fotografie uložené lokálně. Aplikace má mnoho potenciálu
+pro další vývoj, mimo jiné hledání a využití umělé inteligence na detekci objektů a osob.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- Bibliography
-\nocite{zizka}
-%\bibliographystyle{plain-cz-online}
-\bibliography{reference}
+% \nocite{zizka}
+% \bibliographystyle{plain-cz-online}
+% \bibliography{reference}
 
 \end{document}
