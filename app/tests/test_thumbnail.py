@@ -1,6 +1,9 @@
 import unittest
 import numpy as np
 import random
+import io
+from PIL import Image
+
 
 import indexer.thumbnail
 
@@ -40,6 +43,18 @@ class ThumbnailTest(unittest.TestCase):
             dim_y, dim_x, _ = thumb_array.shape
             self.assertTrue(abs(size_x / size_y
                                 - dim_x / dim_y) < aspect_ratio_tolerance)
+
+    """
+    Test generating a thubnail form a valid image.
+    """
+    def test_generating_from_jpeg(self):
+        thumb = indexer.thumbnail \
+            .generate_thumbnail_from_path("sample_img.jpg")
+        file = io.BytesIO(thumb[2])
+        given_size = (thumb[0], thumb[1])
+        img = Image.open(file)
+
+        self.assertEqual(given_size, img.size)
 
     """
     Test graceful failure with invalid image.
