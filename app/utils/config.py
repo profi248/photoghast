@@ -32,6 +32,13 @@ cache_max_sec = 3600 * 24 * 7
 # to belong to one place in kilometers
 place_static_radius_km = 0.5
 
+# location lokup coordinates rouding decimal places
+location_decimals = 3
+
+# location lookup zoom level 0-18
+# (https://nominatim.org/release-docs/latest/api/Reverse/)
+osm_nominatim_zoom_level = 16
+
 # Nominatim endopoint for revese geocoding
 osm_nominatim_reverse_endpoint = "https://nominatim.openstreetmap.org/reverse"
 

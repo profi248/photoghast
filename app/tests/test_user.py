@@ -65,6 +65,5 @@ class UserTests(unittest.TestCase):
                          .check_password_requirements(bad_password))
 
 
-
 if __name__ == '__main__':
     unittest.main()
