@@ -43,13 +43,22 @@ def reverse_geocode(lat: float, lon: float,
                          headers=headers)
         data = r.json()
 
-        info = {
-            "name": data["display_name"],
-            "short_name": data["name"],
-            "licence": data["licence"]
-        }
+        if "name" in data and data["name"]:
+            full_name = data["name"]
 
-        return info
+            if "address" in data:
+                if "suburb" in data["address"] and data["address"]["suburb"]:
+                    suburb = data["address"]["suburb"]
+                    full_name += ", " + suburb
+
+                if "state" in data["address"] and data["address"]["state"]:
+                    state = data["address"]["state"]
+                    full_name += ", " + state
+
+        else:
+            full_name = data["display_name"]
+
+        return full_name
 
     except (KeyError, requests.exceptions.RequestException) as e:
         print("reverse geocode failed:", e)

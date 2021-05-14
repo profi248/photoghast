@@ -1,5 +1,3 @@
-import PIL
-import sqlalchemy as sql
 import os
 import exiftool
 from datetime import datetime, timedelta
@@ -9,31 +7,6 @@ import utils.config as config
 from utils.db_models import *
 from utils.common import get_db_session
 from thumbnail import generate_thumbnail_from_path
-
-
-verbose = config.debug
-scan_path = config.image_path
-
-session = get_db_session()
-
-scan_started = datetime.now()
-epoch_zero = datetime.fromtimestamp(0)
-
-last_update = session.query(LastUpdated.date) \
-    .filter(LastUpdated.key == "fs_scan").one_or_none()
-if last_update:
-    print("[indexer] last scan started:", last_update[0])
-    last_update = last_update[0]
-else:
-    print("[indexer] first scan")
-    session.add(LastUpdated(key="fs_scan", date=epoch_zero))
-    if verbose:
-        print("[DB] commit")
-    session.commit()
-    last_update = epoch_zero
-
-nodes_cnt = 0
-new_cnt = 0
 
 
 # browse folders recursively
@@ -152,11 +125,7 @@ def browse_folder(path, album=None):
                                                                gps_lon)
 
                         if geodata:
-                            if "short_name" in geodata \
-                                    and geodata["short_name"]:
-                                place_name = geodata["short_name"]
-                            else:
-                                place_name = geodata["name"]
+                            place_name = geodata
                         else:
                             place_name = "location near {}, {}".format(gps_lat,
                                                                        gps_lon)
@@ -242,10 +211,36 @@ def browse_folder(path, album=None):
 
 
 if __name__ == "__main__":
-    print("[indexer] starting scan")
+    verbose = config.debug
+    scan_path = config.image_path
+
+    session = get_db_session()
+
+    scan_started = datetime.now()
+    epoch_zero = datetime.fromtimestamp(0)
+
+    last_update = session.query(LastUpdated.date) \
+        .filter(LastUpdated.key == "fs_scan").one_or_none()
+    if last_update:
+        print("[indexer] last scan started:", last_update[0])
+        last_update = last_update[0]
+    else:
+        print("[indexer] first scan")
+        session.add(LastUpdated(key="fs_scan", date=epoch_zero))
+        if verbose:
+            print("[DB] commit")
+        session.commit()
+        last_update = epoch_zero
+
+    nodes_cnt = 0
+    new_cnt = 0
+
     exif = exiftool.ExifTool()
     exif.start()
+
+    print("[indexer] starting scan")
     browse_folder(scan_path)
+
     exif.terminate()
     session.commit()
     if verbose:

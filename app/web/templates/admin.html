@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1 class="mb-3">admin</h1>
-    <h3>add user </h3>
+    <h3>add user</h3>
     <div class="row">
         <form class="col-sm-6 col-lg-4" method="POST" action="{{ url_for('add_user') }}">
             {{ form.csrf_token }}
