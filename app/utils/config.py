@@ -1,20 +1,20 @@
 # absolute path to folder with images
-image_path = "/var/home/david/PYT/photoghast/app/test-images"
+image_path = ""
 
 # random value used for cryptographic operations
 secret = "ecKCVdTFJDsmQNsuLY7n49qsQB5BKKon9STreK9cL9XC3kduvY56izgJ2H2RkuCv"
 
 # SQLAlchemy database URI https://docs.sqlalchemy.org/en/14/core/engines.html
-db_uri = "sqlite:///index3.db"
+db_uri = "sqlite:///index.db"
 
 # default credentials used in initial installation
 default_username = "admin"
 default_pass = "pythonrocks"
 
 # show more verbose output
-debug = True
+debug = False
 # show more verbose output for database operations
-db_debug = True
+db_debug = False
 
 # allowed file extensions
 file_extensions_whitelist = ["jpg", "jpeg", "png"]
