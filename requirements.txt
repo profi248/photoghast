@@ -14,7 +14,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
 numpy==1.20.3
-Pillow==8.3.2
+Pillow==9.0.1
 pycodestyle==2.7.0
 pycparser==2.20
 PyExifTool==0.4.7
